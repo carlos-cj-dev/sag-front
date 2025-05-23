@@ -1612,9 +1612,10 @@
             document.getElementById('bnccSkillsList').innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i><p class="mt-2 text-gray-500">Carregando dados...</p></div>';
             document.getElementById('studentRankingList').innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando ranking de alunos...</td></tr>';
             
-            // Resetar páginas atuais ao aplicar novos filtros
-            currentPage = 1;
-            currentRankPage = 1;
+            // Resetar páginas atuais ao aplicar novos filtros não é mais necessário aqui
+            // pois as funções de carregamento já cuidam disso
+            // currentPage = 1;
+            // currentRankPage = 1;
             
             // Recarregar os gráficos e tabelas com base nos filtros
             loadSchoolPerformanceChart(yearFilter, regionFilter, groupFilter, schoolFilter, gradeFilter, classFilter, resultsFilter);
@@ -1815,6 +1816,9 @@
             document.getElementById('bnccSkillsList').innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i><p class="mt-2 text-gray-500">Carregando habilidades...</p></div>';
             
             try {
+                // Definir currentPage como a página solicitada, garantindo que a paginação visual seja atualizada corretamente
+                currentPage = page;
+                
                 // Construir parâmetros da URL para a API com formato consistente
                 const params = new URLSearchParams();
                 
@@ -1854,7 +1858,8 @@
                     if (data && (data.content || data.items || data.data)) {
                         // Extrair conteúdo e informações de paginação
                         const content = data.content || data.items || data.data || [];
-                        currentPage = data.number !== undefined ? data.number + 1 : (data.page || page);
+                        // Não sobrescrever currentPage com o valor da API, já definimos acima
+                        // currentPage = data.number !== undefined ? data.number + 1 : (data.page || page);
                         totalBnccItems = data.totalElements || data.total || data.count || 0;
                         
                         // Formatar os dados para o formato usado pela UI
@@ -2033,8 +2038,8 @@
                 // Definir o tipo de resultados e carregar da API
                 const resultsFilter = type === 'critical' ? 'low' : (type === 'best' ? 'high' : 'all');
                 
-                // Resetar para a primeira página ao aplicar um novo filtro
-                currentPage = 1;
+                // Ao iniciar um novo filtro, sempre começar da página 1
+                // Não precisamos definir currentPage aqui pois isso será feito na função loadBnccSkills
                 
                 // Carregar dados com os filtros aplicados
                 loadBnccSkills(
@@ -2045,7 +2050,7 @@
                     gradeFilter, 
                     classFilter, 
                     resultsFilter, 
-                    currentPage
+                    1  // Página inicial
                 );
             } catch (error) {
                 console.error('Erro ao filtrar habilidades BNCC:', error);
@@ -2642,7 +2647,8 @@
             const newPage = currentPage + delta;
             
             if (newPage >= 1 && newPage <= totalPages) {
-                // Recarregar dados do servidor para a nova página
+                // Não precisamos atualizar currentPage aqui, pois isso será feito na função loadBnccSkills
+                
                 // Obter os filtros atuais
                 const yearFilter = document.getElementById('filterYear').value;
                 const regionFilter = document.getElementById('filterRegion').value;
@@ -2668,6 +2674,8 @@
         
         // Função para ir para uma página específica
         function goToPage(page) {
+            // Não precisamos atualizar currentPage aqui, pois isso será feito na função loadBnccSkills
+            
             // Obter os filtros atuais
             const yearFilter = document.getElementById('filterYear').value;
             const regionFilter = document.getElementById('filterRegion').value;
