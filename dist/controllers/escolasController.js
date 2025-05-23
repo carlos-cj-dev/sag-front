@@ -1,10 +1,24 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteEscola = exports.updateEscola = exports.createEscola = exports.getEscolaById = exports.getEscolas = void 0;
 const database_1 = require("../config/database");
-const getEscolas = async (req, res) => {
+/**
+ * @desc    Obter todas as escolas
+ * @route   GET /api/v1/escolas
+ * @access  Private
+ */
+const getEscolas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const escolas = await database_1.prisma.escola.findMany({
+        const escolas = yield database_1.prisma.escola.findMany({
             orderBy: {
                 nome: 'asc'
             }
@@ -23,12 +37,17 @@ const getEscolas = async (req, res) => {
             error: error.message
         });
     }
-};
+});
 exports.getEscolas = getEscolas;
-const getEscolaById = async (req, res) => {
+/**
+ * @desc    Obter uma escola pelo ID
+ * @route   GET /api/v1/escolas/:id
+ * @access  Private
+ */
+const getEscolaById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const escolaId = parseInt(req.params.id);
-        const escola = await database_1.prisma.escola.findUnique({
+        const escola = yield database_1.prisma.escola.findUnique({
             where: { id: escolaId },
             include: {
                 turmas: true
@@ -53,18 +72,24 @@ const getEscolaById = async (req, res) => {
             error: error.message
         });
     }
-};
+});
 exports.getEscolaById = getEscolaById;
-const createEscola = async (req, res) => {
+/**
+ * @desc    Criar uma nova escola
+ * @route   POST /api/v1/escolas
+ * @access  Private/Admin
+ */
+const createEscola = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { nome, regiao, grupo, endereco, telefone, email, diretor } = req.body;
+        // Validação básica
         if (!nome) {
             return res.status(400).json({
                 success: false,
                 message: 'O nome da escola é obrigatório'
             });
         }
-        const escola = await database_1.prisma.escola.create({
+        const escola = yield database_1.prisma.escola.create({
             data: {
                 nome,
                 regiao,
@@ -89,13 +114,19 @@ const createEscola = async (req, res) => {
             error: error.message
         });
     }
-};
+});
 exports.createEscola = createEscola;
-const updateEscola = async (req, res) => {
+/**
+ * @desc    Atualizar uma escola existente
+ * @route   PUT /api/v1/escolas/:id
+ * @access  Private/Admin
+ */
+const updateEscola = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const escolaId = parseInt(req.params.id);
         const { nome, regiao, grupo, endereco, telefone, email, diretor } = req.body;
-        const escolaExists = await database_1.prisma.escola.findUnique({
+        // Verificar se a escola existe
+        const escolaExists = yield database_1.prisma.escola.findUnique({
             where: { id: escolaId }
         });
         if (!escolaExists) {
@@ -104,7 +135,8 @@ const updateEscola = async (req, res) => {
                 message: 'Escola não encontrada'
             });
         }
-        const escola = await database_1.prisma.escola.update({
+        // Atualizar a escola
+        const escola = yield database_1.prisma.escola.update({
             where: { id: escolaId },
             data: {
                 nome,
@@ -130,12 +162,18 @@ const updateEscola = async (req, res) => {
             error: error.message
         });
     }
-};
+});
 exports.updateEscola = updateEscola;
-const deleteEscola = async (req, res) => {
+/**
+ * @desc    Excluir uma escola
+ * @route   DELETE /api/v1/escolas/:id
+ * @access  Private/Admin
+ */
+const deleteEscola = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const escolaId = parseInt(req.params.id);
-        const escolaExists = await database_1.prisma.escola.findUnique({
+        // Verificar se a escola existe
+        const escolaExists = yield database_1.prisma.escola.findUnique({
             where: { id: escolaId }
         });
         if (!escolaExists) {
@@ -144,10 +182,11 @@ const deleteEscola = async (req, res) => {
                 message: 'Escola não encontrada'
             });
         }
-        const turmaCont = await database_1.prisma.turma.count({
+        // Verificar se existem turmas ou alunos associados à escola
+        const turmaCont = yield database_1.prisma.turma.count({
             where: { escolaId }
         });
-        const alunoCont = await database_1.prisma.aluno.count({
+        const alunoCont = yield database_1.prisma.aluno.count({
             where: { escolaId }
         });
         if (turmaCont > 0 || alunoCont > 0) {
@@ -158,7 +197,8 @@ const deleteEscola = async (req, res) => {
                 alunos: alunoCont
             });
         }
-        await database_1.prisma.escola.delete({
+        // Excluir a escola
+        yield database_1.prisma.escola.delete({
             where: { id: escolaId }
         });
         res.status(200).json({
@@ -174,6 +214,5 @@ const deleteEscola = async (req, res) => {
             error: error.message
         });
     }
-};
+});
 exports.deleteEscola = deleteEscola;
-//# sourceMappingURL=escolasController.js.map
